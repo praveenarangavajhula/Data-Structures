@@ -1,0 +1,403 @@
+package ch1;
+
+import java.util.Scanner;
+
+public class MyLinkedList<AnyType> implements Iterable<AnyType>
+{ 
+         
+    public MyLinkedList( )
+    {        doClear( );    }
+    
+    private void clear( )
+    {        doClear( );    }
+ 
+    public void doClear( )
+    {
+        beginMarker = new Node<>( null, null, null );
+        endMarker = new Node<>( null, beginMarker, null );
+        beginMarker.next = endMarker;
+        
+        theSize = 0;
+        modCount++;
+    }
+    
+ 
+    public int size( )
+    {
+        return theSize;
+    }
+    
+    public boolean isEmpty( )
+    {
+        return size( ) == 0;
+    }
+
+    public boolean add( AnyType x )
+    {
+        add( size( ), x );   
+        return true;         
+    }
+
+    public void add( int idx, AnyType x )
+    {
+        addBefore( getNode( idx, 0, size( ) ), x );
+    }
+   
+    private void addBefore( Node<AnyType> p, AnyType x )
+    {
+        Node<AnyType> newNode = new Node<>( x, p.prev, p );
+        newNode.prev.next = newNode;
+        p.prev = newNode;         
+        theSize++;
+        modCount++;
+    }   
+    
+    public void shift(int n)
+    { 
+         Node<AnyType> currentFirstNode = beginMarker.next;
+        
+        if(n<=0){
+            int firstElementIndex = this.size() - 1 ;
+            Node<AnyType> futureFirstNode = getNode(firstElementIndex);
+            Node<AnyType> futureLastNode = getNode(firstElementIndex -1 );
+            Node<AnyType> lastNode = null;
+            lastNode = futureFirstNode;
+            futureLastNode.next = endMarker;
+            endMarker.prev = futureLastNode;
+            futureFirstNode.prev = beginMarker;
+            beginMarker.next = futureFirstNode;
+            lastNode.next = currentFirstNode;
+            currentFirstNode.prev = lastNode;
+            
+        }else{
+        int firstElementIndex = 1;
+            Node<AnyType> futureFirstNode = getNode(firstElementIndex);
+            Node<AnyType> futureLastNode = getNode(firstElementIndex-1  );
+            Node<AnyType> lastNode = endMarker.prev;
+            beginMarker.next = futureFirstNode;
+            futureFirstNode.prev = beginMarker;
+            endMarker.prev = futureLastNode;
+            futureLastNode.next = endMarker;
+            lastNode.next = currentFirstNode;
+            currentFirstNode.prev = lastNode;
+        
+        }  
+     
+    }
+
+      
+    
+    public AnyType get( int idx )
+    {
+        return getNode( idx ).data;
+    }
+
+    public AnyType set( int idx, AnyType newVal )
+    {
+        Node<AnyType> p = getNode( idx );
+        AnyType oldVal = p.data;
+        
+        p.data = newVal;   
+        return oldVal;
+    }
+
+    private Node<AnyType> getNode( int idx )
+    {
+        return getNode( idx, 0, size( ) - 1 );
+    }
+ 
+    private Node<AnyType> getNode( int idx, int lower, int upper )
+    {
+        Node<AnyType> p;
+        
+        if( idx < lower || idx > upper )
+            throw new IndexOutOfBoundsException( "getNode index: " + idx + "; size: " + size( ) );
+            
+        if( idx < size( ) / 2 )
+        {
+            p = beginMarker.next;
+            for( int i = 0; i < idx; i++ )
+                p = p.next;            
+        }
+        else
+        {
+            p = endMarker;
+            for( int i = size( ); i > idx; i-- )
+                p = p.prev;
+        } 
+        
+        return p;
+    }
+
+
+
+public void erase(int idx , int num){
+        if(idx < 0 || idx > size()-1 || num<=0 || idx + num  -1 > size() -1){
+            System.out.println("Wrong values entered for erase operation");
+            return;
+        }
+        while(num!=0)
+        {
+            remove(idx);          
+            num--;
+        }
+
+    }
+
+ public void insertList(int idx , MyLinkedList<AnyType> list1){
+        
+   if(idx <0 || idx > size()-1){
+            System.out.println("Invalid index value");
+            return;
+        }
+        Node p = null;
+        Node q = null;
+        if(idx ==0) {
+        p = this.beginMarker;
+        q = this.getNode(idx);
+       
+        }else if(idx == this.size() -1 ){
+        p = this.endMarker.prev;
+        q = this.endMarker;
+       
+        }else{
+        p = this.getNode(idx-1); 
+         q = this.getNode(idx);
+        }
+        
+        list1.beginMarker.next.prev = p;
+        list1.endMarker.prev.next = q;
+        p.next = list1.beginMarker.next;
+        q.prev = list1.endMarker.prev;
+        
+    
+     
+    }
+   
+    
+ 
+   
+    
+     public void swap(int x, int y){
+        
+        if(x < 0 || x > this.size()-1 || y<0 || y > this.size() -1)
+        {
+            System.out.println("Invalid index");
+            System.exit(0);
+        }
+        Node n1 = null;
+        n1=getNode(x);
+        Node n2 ;
+        n2=getNode(y);
+    
+        
+        n1.prev.next = n2;
+        n2.prev.next = n1;
+        n2.next.prev = n1;
+        n1.next.prev = n2;
+            
+        Node tmp =null;
+        tmp = n1.prev;
+        n1.prev = n2.prev;
+        n2.prev = tmp;
+        tmp=n1.next;
+        n1.next = n2.next;
+        n2.next = tmp;       
+       
+       
+        
+        
+    
+}
+    public AnyType remove( int idx )
+    {
+        return remove( getNode( idx ) );
+    }
+
+    private AnyType remove( Node<AnyType> p )
+    {
+        p.next.prev = p.prev;
+        p.prev.next = p.next;
+        theSize--;
+        modCount++;
+        
+        return p.data;
+    }
+    
+ 
+    
+    /**
+     * Returns a String representation of this collection.
+     */
+    public String toString( )
+    {
+        StringBuilder sb = new StringBuilder( "[ " );
+        
+        for( AnyType x : this )
+            sb.append( x + " " );
+        sb.append( "]" );
+
+        return new String( sb );
+    }
+
+    public java.util.Iterator<AnyType> iterator( )
+    {
+        return new LinkedListIterator( );
+    }
+
+    private class LinkedListIterator implements java.util.Iterator<AnyType>
+    {
+        private Node<AnyType> current = beginMarker.next;
+        private int expectedModCount = modCount;
+        private boolean okToRemove = false;
+        
+        public boolean hasNext( )
+        {
+            return current != endMarker;
+        }
+        
+        public AnyType next( )
+        {
+            if( modCount != expectedModCount )
+                throw new java.util.ConcurrentModificationException( );
+            if( !hasNext( ) )
+                throw new java.util.NoSuchElementException( ); 
+                   
+            AnyType nextItem = current.data;
+            current = current.next;
+            okToRemove = true;
+            return nextItem;
+        }
+        
+        public void remove( )
+        {
+            if( modCount != expectedModCount )
+                throw new java.util.ConcurrentModificationException( );
+            if( !okToRemove )
+                throw new IllegalStateException( );
+                
+            MyLinkedList.this.remove( current.prev );
+            expectedModCount++;
+            okToRemove = false;       
+        }
+    }
+   
+
+
+      
+
+         
+      
+    private static class Node<AnyType>
+    {
+        public Node( AnyType d, Node<AnyType> p, Node<AnyType> n )
+        {
+            data = d; prev = p; next = n;
+        }
+        
+        public AnyType data;
+        public Node<AnyType>   prev;
+        public Node<AnyType>   next;
+    }
+    
+    private int theSize;
+    private int modCount = 0;
+    Node<AnyType> beginMarker;
+    private Node<AnyType> endMarker;
+}
+
+class TestLinkedList
+{
+
+   
+    
+ public static void main( String [ ] args )
+    {
+        MyLinkedList<Integer> lst = new MyLinkedList<>( );
+     
+        for(int i=1;i<5;i++)
+        {            lst.add(i);        }
+   
+        
+        System.out.println("Size of the list is "+lst.size());
+
+        System.out.println("Initial List\n"+lst);
+
+        System.out.println("Enter a number from the menu\n1.Swap\n2.Shift\n3.Erase\n4.Insert List");   
+        
+        Scanner in = new Scanner(System.in);
+        int ch=in.nextInt();
+        int ch1,ch2,n;
+      
+        
+        switch (ch) {
+        	case 1:System.out.println("Enter position number of nodes to swap");
+        			ch1=in.nextInt();
+                                ch2=in.nextInt();
+        			lst.swap(ch1, ch2);
+        			break;
+               
+        	case 2:System.out.println("Enter a positive number for forward shift and negative number for backward shift");
+        			n=in.nextInt();
+  
+
+
+       int c; c=0;
+      if(n>0)
+      {
+          c=n;
+          while(c!=0)
+          {
+              lst.shift(n);
+              c--;
+          }
+          
+      }
+ 
+   else
+     {
+
+        c=Math.abs(n);         
+         System.out.println(c);
+         
+         while(c!=0)
+         {
+             lst.shift(n);
+             c--;
+         }
+         
+     }
+     
+        			break;
+
+       
+        	case 3:System.out.println("Enter an index number from where the erase must begin and number of elements to erase");
+        			ch1=in.nextInt();
+        			ch2=in.nextInt();
+        			lst.erase(ch1,ch2);
+        			break;
+   
+        	case 4:MyLinkedList<Integer> lst1 = new MyLinkedList<>();
+                                System.out.println("Build the list you want to insert");
+                                System.out.println("Enter the number of elements");
+                                ch1=in.nextInt();
+                                for(int i=0;i<ch1;i++)
+                                {
+                                    System.out.println("Enter the element at pos "+i);
+                                    ch2=in.nextInt();
+                                    lst1.add(ch2);
+                                }
+                                System.out.println(lst1);
+        			System.out.println("Enter the position to insert this new list");
+        			int ch3=in.nextInt();
+        			lst.insertList(ch3,lst1);
+        			break;
+        			
+        	default: System.out.println("Enter a number between (1-4)");
+            		 break;
+        }
+
+        System.out.println("After\n"+lst);
+
+    }
+}
